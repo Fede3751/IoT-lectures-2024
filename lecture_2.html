@@ -4,7 +4,7 @@
 	</head>
 	<body>
 		<div id="main">
-			<p class="title"> IoT Lab Lecture 1 - Additional Stuff </p>
+			<p class="title"> IoT Lab Lecture 2 - 25/03/2024 </p>
 			<div class="divider"></div>
 
 			<p>
@@ -15,8 +15,8 @@
 				more complex applications, and interact with different nodes simultaneously.<br><br>
 				
 				In this lecture, we will first see how to manage ROS code using workspaces and packages, and then how to interact with
-				ROS topics thorugh a Python script.<br>
-				Some excercies are given to test your understanding of the new arguments.
+				ROS topics through a Python script.<br>
+				Some exercises are given to test your understanding of the new arguments.
 			</p>
 
 
@@ -61,7 +61,7 @@
 				Once you're in your <span class="snippet">src</span> folder, just type:
 
 				<p class="code">
-					git clone https://github.com/ros/ros_tutorials.git -b humble-devel
+					git clone https://github.com/ros/ros_tutorials.git -b humble
 				</p>
 
 				This should have populated your <span class="snippet">src</span> directory with all the source code of the examples.<br>
@@ -171,7 +171,7 @@
 					src/my_package/my_package/my_node.py
 				</p>
 
-				With this. You have officialy created your first ROS node from scrap.<br>
+				With this. You have officially created your first ROS node from scrap.<br>
 				Nice. Now I guess you would like to do something actually interesting with the node. Let's get to it!
 
 			</p>
@@ -287,12 +287,12 @@ if __name__ == '__main__':
 				The first argument of the function defines the type of message the topic takes. In this case, we are defining a subscriber
 				to a topic which takes in input messages of type <span class="snippet">String</span>.<br><br>
 
-				The name of the topic is given as the second arguent of the function. In this case, our topic is simply called "topic".<br><br>
+				The name of the topic is given as the second argument of the function. In this case, our topic is simply called "topic".<br><br>
 
-				Note that a topic is never "created" from scratch, we are just writing a subcriber for it.<br>
+				Note that a topic is never "created" from scratch, we are just writing a subscriber for it.<br>
 				This means that, in the event of the topic not existing yet, we will create a new one with the given name. Otherwise the node will just subscribe
 				to an already existing topic.<br>
-				We will soon see that the same behaviour applies to publishers.<br><br>
+				We will soon see that the same behavior applies to publishers.<br><br>
 
 
 				We then define, with the third argument, a callback for the subscription, this is the function that will be executed when messages
@@ -339,7 +339,7 @@ if __name__ == '__main__':
 
 				The rest of the script is just simple code to call the main function if the file is being executed.<br><br>
 				
-				This complete our overview of the subsrciber node.<br><br><br>
+				This complete our overview of the subscriber node.<br><br><br>
 				
 
 
@@ -484,7 +484,7 @@ entry_points={
 
 				You are requested to write a ROS publisher which interfaces with TurtleSim!<br><br>
 				
-				Now that you are able to write a more complicated behaviour than a simple movement, you should be able to program
+				Now that you are able to write a more complicated behavior than a simple movement, you should be able to program
 				the turtle to do something more fancy.<br>
 				You are here requested to move the turtle in a <strong>square</strong> path.<br><br>
 
@@ -497,80 +497,14 @@ entry_points={
 			<div class="spoiler">
 				<div>
 					<p>
-						How did it go?<br><br>
-
-						You may have some problems in using for the first time external interfaces in your code.<br>
-						The first thing you should do, is importing the <span class="snippet">Twist</span> message, in order to be able to send
-						it to the right topic later (which is <span class="snippet">/turtle1/cmd_vel</span>).<br>
-						The <span class="snippet">Twist</span> message is also composed of two <span class="snippet">Vector3</span> variables,
-						so we will have to import that too.<br><br>
-
-						We will use the file <span class="snippet">minimal_publisher.py</span> as a reference.<br>
-						Just copy the content of it in a new package of your choice, and we will use that to write our code.<br><br>
-
-						These imports should be added to your code:
-
-						<p class="code">
-							from geometry_msgs.msg import Twist<br>
-							from geometry_msgs.msg import Vector3
-						</p>
-
-						Then, what we need to do, is to change the function <span class="snippet">create_publisher()</span> as follows:
-
-						<pre>
-self.publisher = self.create_publisher(
-    Twist,
-    '/turtle1/cmd_vel',
-    10
-)
-						</pre>
-
-						What we changed here is: the type of message of the topic, from <span class="snippet">String</span> to <span class="snippet">Twist</span>,
-						and the topic we are publishing to to <span class="snippet">/turtle1/cmd_vel</span> (from simply <span class="snippet">topic</span>).<br><br>
-
-						What we need to change now is the <span class="snippet">timer_callback()</span>, in order to accomodate our new message.<br><br>
-
-						First, let's define outside the class the set of linear movements our turtle will take as follows:
-
-						<pre>
-turtle_moves = [
-    Vector3(x=1.0, y=0.0, z=0.0),
-    Vector3(x=0.0, y=1.0, z=0.0),
-    Vector3(x=-1.0, y=0.0, z=0.0),
-    Vector3(x=0.0, y=-1.0, z=0.0)
-]
-						</pre>
-
-						This is a sequence of moves that will allow the turtle to perform a square path in our screen.<br>
-						All we need to do now is send these movements in order with our <span class="snippet">timer_callback()</span> function.<br><br>
-
-						The function should be something like this:
-
-						<pre>
-def timer_callback(self):
-    msg = Twist()
-    msg.linear = turtle_moves[self.i%4]
-    msg.angular = Vector3(x=0.0, y=0.0, z=0.0)
-    self.i += 1
-    self.publisher.publish(msg)
-						</pre>
-
-						What we are telling the program here, is to take one movement at time from our <span class="snippet">turtle_moves</span> array, and then publish
-						it to the previously created topic. The <span class="snippet">angular</span> movement is all set to zero, as we don't care about rotating the
-						turtle here.<br>
-						Remember to create your <span class="snippet">self.i</span> variable in your <span class="snippet">__init__()</span> function, and set it to 0.<br><br>
-
-						That's it!<br>
-						Just run one TurtleSim in a separate window, and then your publisher node (after properly linking and building it), and it should be all set!<br><br>
-
-						The full code for the node is uplodaded at the following link: <a href="exercise_solutions/exercise_2/turtle_publisher.py">turtle_publisher.py</a>
+						Solution will be online after the lecture!
 					</p>
 				</div>
 			</div>
 
 			<p>
 
-				Your solution shoud look something like this:
+				Your solution should look something like this:
 			</p>
 
 			<img class="centered" src="imgs/lecture_2/square_turtle.png">
@@ -581,11 +515,89 @@ def timer_callback(self):
 				by going always forward. This means that the turtle should rotate when it reaches a corner of the square.<br>
 				Performing a perfect square with a rotation may be tricky, so don't worry too much about that.<br><br>
 
-				Can you also do that by listenting to <span class="snippet">/turtle1/pose</span>?<br><br>
+				Can you also do that by listening to <span class="snippet">/turtle1/pose</span>?<br><br>
 
 				Give it a try!
 			
 			</p>
+
+
+
+
+			<!-- <p class="section">Setting Parameters for your Nodes</p>
+
+
+			<p>
+				Sometimes you may have the need to expose some properties of your nodes outside the scope of your code, maybe to allow 
+				some customization or flexibility of the package you are developing.<br>
+				This exactly what paremeters are for.<br>
+				Additionally, parameters can be set at launch time by defining a special ROS launch file. We will see how to do that in the next lecture.<br><br>
+
+				Creating and setting parameters is pretty easy and straightforward, let's see how we can do it.<br><br>
+
+				Let's create a package for an example:
+
+				<p class="code">
+					ros2 pkg create --build-type ament_python python_parameters --dependencies rclpy
+				</p>
+
+				<br>And let's create in the appropriate directory a new file called <span class="snippet">python_parameters_node.py</span>.<br>
+
+				This will be the code for our node:
+
+				<pre>
+import rclpy
+import rclpy.node
+
+class MinimalParam(rclpy.node.Node):
+	def __init__(self):
+		super().__init__('minimal_param_node')
+
+		self.declare_parameter('my_parameter', 'world')
+		self.timer = self.create_timer(1, self.timer_callback)
+
+	def timer_callback(self):
+		my_param = self.get_parameter('my_parameter').get_parameter_value().string_value
+		self.get_logger().info('Hello %s!' % my_param)
+
+		my_new_param = rclpy.parameter.Parameter(
+			'my_parameter',
+			rclpy.Parameter.Type.STRING,
+			'world'
+		)
+
+		all_new_parameters = [my_new_param]
+		self.set_parameters(all_new_parameters)
+
+def main():
+	rclpy.init()
+	node = MinimalParam()
+	rclpy.spin(node)
+
+if __name__ == '__main__':
+	main()
+				</pre>
+
+				<br>Let's comment this code for a little bit.<br>
+				As we have previously seen before, in the <span class="snippet">__init__()</span> function we are defining the node name, and scheduling a periodic action of the method <span class="snippet">timer_callback()</span>.<br>
+				Additionally, we are defining a parameter named "my_parameter" with a value of "world" using the function <span class="snippet">declare_parameter()</span>.<br><br>
+
+				In the <span class="snippet">timer_callback()</span> method, we have two important functions that are used to interact with parameters.<br>
+				One of them is <span class="snippet">get_parameter().get_parameter_value()</span> which allows us to read parameter values and use them in the code.<br>
+				The second important function is <span class="snippet">set_parameters()</span>, which allows us to set parameters given in input to a desired value.<br><br>
+
+				What this code does is, essentially, in case of an external modification of the value, resetting every second the "my_parameter" parameter to the "world" value.<br><br><br>
+
+
+				You can test its execution, after linking, compiling and running it, by changing the parameter from console using the command:
+
+				<p class="code">
+					ros2 param set /minimal_param_node my_parameter earth
+				</p>
+
+				<br>And that's it!
+			</p> -->
+
 
 
 			<p class="section">Conclusions</p>
