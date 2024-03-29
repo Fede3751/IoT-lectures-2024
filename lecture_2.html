@@ -497,7 +497,73 @@ entry_points={
 			<div class="spoiler">
 				<div>
 					<p>
-						Solution will be online after the lecture!
+						How did it go?<br><br>
+
+						You may have some problems in using for the first time external interfaces in your code.<br>
+						The first thing you should do, is importing the <span class="snippet">Twist</span> message, in order to be able to send
+						it to the right topic later (which is <span class="snippet">/turtle1/cmd_vel</span>).<br>
+						The <span class="snippet">Twist</span> message is also composed of two <span class="snippet">Vector3</span> variables,
+						so we will have to import that too.<br><br>
+
+						We will use the file <span class="snippet">minimal_publisher.py</span> as a reference.<br>
+						Just copy the content of it in a new package of your choice, and we will use that to write our code.<br><br>
+
+						These imports should be added to your code:
+
+						<p class="code">
+							from geometry_msgs.msg import Twist<br>
+							from geometry_msgs.msg import Vector3
+						</p>
+
+						Then, what we need to do, is to change the function <span class="snippet">create_publisher()</span> as follows:
+
+						<pre>
+self.publisher = self.create_publisher(
+    Twist,
+    '/turtle1/cmd_vel',
+    10
+)
+						</pre>
+
+						What we changed here is: the type of message of the topic, from <span class="snippet">String</span> to <span class="snippet">Twist</span>,
+						and the topic we are publishing to to <span class="snippet">/turtle1/cmd_vel</span> (from simply <span class="snippet">topic</span>).<br><br>
+
+						What we need to change now is the <span class="snippet">timer_callback()</span>, in order to accomodate our new message.<br><br>
+
+						First, let's define outside the class the set of linear movements our turtle will take as follows:
+
+						<pre>
+turtle_moves = [
+    Vector3(x=1.0, y=0.0, z=0.0),
+    Vector3(x=0.0, y=1.0, z=0.0),
+    Vector3(x=-1.0, y=0.0, z=0.0),
+    Vector3(x=0.0, y=-1.0, z=0.0)
+]
+						</pre>
+
+						This is a sequence of moves that will allow the turtle to perform a square path in our screen.<br>
+						All we need to do now is send these movements in order with our <span class="snippet">timer_callback()</span> function.<br><br>
+
+						The function should be something like this:
+
+						<pre>
+def timer_callback(self):
+    msg = Twist()
+    msg.linear = turtle_moves[self.i%4]
+    msg.angular = Vector3(x=0.0, y=0.0, z=0.0)
+    self.i += 1
+    self.publisher.publish(msg)
+						</pre>
+
+						What we are telling the program here, is to take one movement at time from our <span class="snippet">turtle_moves</span> array, and then publish
+						it to the previously created topic. The <span class="snippet">angular</span> movement is all set to zero, as we don't care about rotating the
+						turtle here.<br>
+						Remember to create your <span class="snippet">self.i</span> variable in your <span class="snippet">__init__()</span> function, and set it to 0.<br><br>
+
+						That's it!<br>
+						Just run one TurtleSim in a separate window, and then your publisher node (after properly linking and building it), and it should be all set!<br><br>
+
+						The full code for the node is uplodaded at the following link: <a href="exercise_solutions/exercise_2/turtle_publisher.py">turtle_publisher.py</a>
 					</p>
 				</div>
 			</div>
