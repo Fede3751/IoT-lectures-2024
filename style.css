@@ -40,6 +40,7 @@
 	padding:20px;
 	overflow-x: auto;
 	white-space: nowrap;
+	font-size: 14px;
 }
 
 pre {
@@ -106,6 +107,7 @@ body {
 	background-image: url("./imgs/bg.png");
 	background-attachment: fixed;
 	line-height: 140%;
+	font-size:16;
 }
 
 
