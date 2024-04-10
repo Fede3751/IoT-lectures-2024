@@ -19,12 +19,11 @@
 			<p class="section">Creating your own Interfaces</p>
 
 			<p>
-				If you paid attention to the code carefully, you may have noticed that the code we wrote for the service in the last lecture is using a message of type
-				<span class="snippet">AddTwoInts</span>. In order to be able to comfortably work with ROS, you may be 
-				required to be able to implement custom messages to pass to your services and topics. This is what we are going to cover in this part!<br><br>
+				You may have noticed that the code we wrote for the service in the last lecture was using a message of type
+				<span class="snippet">AddTwoInts</span>, a particular interface made ad-hoc for the service we wrote. In order to be able to comfortably work with ROS, you may be 
+				required to be able to implement, in the same way, custom messages to pass to your services and topics. This is what we are going to cover in this part!<br><br>
 
-				We will use the same workspace we used so far to test our new interface, so just go back to your
-				<span class="snippet">src</span> folder and type:
+				Let's create a workspace for this lecture, create a <span class="snippet">src</span> folder inside and type:
 
 				<p class="code">
 					ros2 pkg create --build-type ament_cmake tutorial_interfaces
