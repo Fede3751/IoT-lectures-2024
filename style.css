@@ -72,6 +72,7 @@ pre {
 	color:rgb(10,10,10);
 	margin-left:3px;
 	margin-right:3px;
+	line-height: 25px;
 }
 
 .title {
@@ -107,7 +108,7 @@ body {
 	background-image: url("./imgs/bg.png");
 	background-attachment: fixed;
 	line-height: 140%;
-	font-size:16;
+	font-size:16px;
 }
 
 
