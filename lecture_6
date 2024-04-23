@@ -1,0 +1,563 @@
+<html>
+	<head>
+		<link rel="stylesheet" href="style.css">
+	</head>
+	<body>
+		<div id="main">
+			<p class="title"> IoT Lab Lecture 6 - 24/04/2023 </p>
+
+			<div class="divider"></div>
+
+            <p>    
+                In this lecture, we are finally getting started with the second part of our lab course, by introducing Gazebo!<br>
+                We will take what we have learnt in the past lectures about ROS, and move it to a complex simulation enviroment which allows us
+                to properly test the drones we control with ROS.<br><br>
+
+                Before getting into the code part using ROS, let's take a moment to talk about Gazebo.
+
+                <p class="warning">
+                    <strong>NOTE</strong>: it is expected at this point that you are able to create and configure
+                    ROS packages by heart.<br>
+                    If you're still having doubts on how to build a package, create a node within it and link it, it is highly suggested
+                    to look back at Lecture 2.<br><br>
+                    It is totally fine if you don't remember the exact syntax for scripting topics, services and actions. Feel free to
+                    go back to the past lectures for that, or use the official ROS Humble documentation.
+                </p>
+
+                <img class="centered" src="imgs/lecture_5/gazebo_logo" style="margin-top:-30px; margin-bottom:-50px">
+            </p>
+
+            <p class="section">Gazebo</p>
+            <p>
+                Gazebo is an open-source software used for 3D robotic-simulation.<br><br>
+
+                It allows the developer to test their solution in a simulated environment before deploying them in the real world.<br>
+                Gazebo is a completely independent application from ROS, but, just like ROS, uses topics and services to allow for
+                communication and scripting between entities in the simulation.<br><br>
+
+                If you have ROS already installed, you can install everything you will need to use Gazebo by writing:
+
+                <p class="code">
+                    sudo apt-get install ros-${ROS_DISTRO}-ros-gz
+                </p>
+
+                This will install Gazebo, along with <span class="snippet">ros_gz_bridge</span>, which will allow us to bridge the enviroment of
+                Gazebo with the one of ROS.
+                If you are using the version we've been using so far with ROS (Humble), this command should automatically install Gazebo Fortress
+                as a default version.<br><br>
+
+                Once you do that, we can start an empty world by typing:
+
+                <p class="code">
+                    ign gazebo default.sdf
+                </p>
+
+                This will create an empty world, which we will use to get more confident with the enviroment of Gazebo.<br><br>
+
+                If you want instead to just have fun with Gazebo and learn by trial and error, just type
+                <p class="code">
+                    ign gazebo
+                </p>
+                And this will pop up a new window where you can choose from multiple examples to run, just like this.
+                <img class="centered" src="./imgs/lecture_5/gazebo_examples.png">
+
+                
+                Let's go back to our default world.
+                <img class="centered" src="./imgs/lecture_5/gazebo_default.png">
+
+            </p>
+            <p class="subsection">Gazebo GUI</p>
+            <p>
+                Gazebo offers multiple tools to both control and model the 3D world.<br><br>
+
+                Our interest is mainly in controlling the world in our simulation, but being able to model an already existing world can be useful.<br>
+                On the top left of your screen you have your tool bar. This can be used to spawn simple models, and move existing ones.
+
+                <img class="centered" src="./imgs/lecture_5/gazebo_tools.png">
+
+                On the right side, you have your plugin panel.
+
+                <img class="centered" src="./imgs/lecture_5/gazebo_right_panel.png">
+
+                By default, your instance will start with two plugins: the Component Inspector (top one), and the Entity Tree (bottom one).<br><br>
+
+                There are multiple additional plugins that you can spawn, and you can do that by clicking on the three dots in the top right.
+
+            </p>
+
+            <p class="subsection">SDF - Simulation Description Format</p>
+
+            <p>
+                Gazebo generates 3D world by reading from Simulation Description Format (SDF) files.<br><br>
+                SDF is an XML format which is used to describe objects and environments for robot simulations and visualizations.<br><br>
+
+                Writing SDF files from scrap can be really teadious, but we won't be doing that for the most part.<br>
+                If you want to create your own world, the best course of action would be to find an already existing minimal world, and to build on top of that.<br><br>
+
+                You can do that by opening an already existing world in Gazebo, editing it, end then export it.<br><br>
+
+                Let's export our default world and take a look at the file in output.<br>
+                On the top left: "Save world as..." and store it in a directory of your choice.
+
+                What if we want to add something to this world?<br>
+                If you look closely, we can see that currently our world has already one model in it. Which is the ground plane.<br><br>
+
+                Intuitively, you may have figured out that if we want to add another model, we will need to create a new <span class="snippet">&lt;model&gt;</span> tag.<br><br>
+
+                For advanced modelling, it would be a good idea to find a 3D modelling software which allows you to export your model to an SDF format (if you are familiar with 
+                Blender, there is a plugin for it to do that), but for the time being, we will just build a simple robot with two wheels, to get used to editing SDF files.<br>
+            </p>
+
+            <p class="section">Building a Robot</p>
+
+            <p>
+                During this part, we will build a robot step by step. And visualize the result in Gazebo ass we add things. Get ready to open and close the application multiple times!<br><br>
+
+                Let's start!<br><br>
+
+                In SDF, every model is a a group of <span class="snippet">link</span>s, which can be then connected together using <span class="snippet">joint</span>s.<br><br>
+                We can define the main body of the robot with the following tags! Let's add them alognside the ground plane model.
+
+<pre>
+&lt;model name='vehicle_blue' canonical_link='chassis'&gt;
+    &lt;pose relative_to='world'&gt;0 0 0 0 0 0&lt;/pose&gt;
+    &lt;link name='chassis'&gt;
+      &lt;pose relative_to='__model__'&gt;0.5 0 0.4 0 0 0&lt;/pose&gt;
+      &lt;visual name='visual'&gt;
+          &lt;geometry&gt;
+              &lt;box&gt;
+                  &lt;size&gt;2.0 1.0 0.5&lt;/size&gt;
+              &lt;/box&gt;
+          &lt;/geometry&gt;
+          &lt;!--let's add color to our link--&gt;
+          &lt;material&gt;
+              &lt;ambient&gt;0.0 0.0 1.0 1&lt;/ambient&gt;
+              &lt;diffuse&gt;0.0 0.0 1.0 1&lt;/diffuse&gt;
+              &lt;specular&gt;0.0 0.0 1.0 1&lt;/specular&gt;
+          &lt;/material&gt;
+      &lt;/visual&gt;
+      &lt;collision name='collision'&gt;
+              &lt;geometry&gt;
+                  &lt;box&gt;
+                      &lt;size&gt;2.0 1.0 0.5&lt;/size&gt;
+                  &lt;/box&gt;
+              &lt;/geometry&gt;
+          &lt;/collision&gt;
+      &lt;inertial&gt; &lt;!--inertial properties of the link mass, inertia matix--&gt;
+          &lt;mass&gt;1.14395&lt;/mass&gt;
+          &lt;inertia&gt;
+              &lt;ixx&gt;0.095329&lt;/ixx&gt;
+              &lt;ixy&gt;0&lt;/ixy&gt;
+              &lt;ixz&gt;0&lt;/ixz&gt;
+              &lt;iyy&gt;0.381317&lt;/iyy&gt;
+              &lt;iyz&gt;0&lt;/iyz&gt;
+              &lt;izz&gt;0.476646&lt;/izz&gt;
+          &lt;/inertia&gt;
+      &lt;/inertial&gt;
+    &lt;/link&gt;
+&lt;/model&gt;
+
+</pre>
+
+                Here, we have defined our robot consisting of one single <span class="snippet">link</span>.<br>
+                Inside the <span class="snippet">link</span>, we define, with additional tags, multiple properties:<br><br>
+                
+                -First of all, the visual properties, using the <span class="snippet">visual</span> tag. Which define how 
+                the link will appear in the 3D environment. The <span class="snippet">gometry</span> tag defines the shape,
+                while the <span class="snippet">material</span> tag defines the coloring properties.<br><br>
+                
+                -We have then our <span class="snippet">collision</span> tag, which defines the colliding properties of this link.<br><br>
+
+                -We then define the intertia properties of the link, using the <span class="snippet">inertial</span> tag.<br>
+                No need to go further in details with this one.<br><br>
+
+                Your Gazebo simulation should look something like this:
+
+                <img class="centered" src="./imgs/lecture_5/robot_0.png">
+
+
+                What if we want to add wheels to our robot?<br>
+                More links! And joints!<br><br>
+
+                Let's do it.<br>
+                The code for the wheels is the following:
+
+<pre>
+&lt;link name='left_wheel'&gt;
+    &lt;pose relative_to="chassis"&gt;-0.5 0.6 0 -1.5707 0 0&lt;/pose&gt;
+    &lt;inertial&gt;
+        &lt;mass&gt;1&lt;/mass&gt;
+        &lt;inertia&gt;
+            &lt;ixx&gt;0.043333&lt;/ixx&gt;
+            &lt;ixy&gt;0&lt;/ixy&gt;
+            &lt;ixz&gt;0&lt;/ixz&gt;
+            &lt;iyy&gt;0.043333&lt;/iyy&gt;
+            &lt;iyz&gt;0&lt;/iyz&gt;
+            &lt;izz&gt;0.08&lt;/izz&gt;
+        &lt;/inertia&gt;
+    &lt;/inertial&gt;
+    &lt;visual name='visual'&gt;
+        &lt;geometry&gt;
+            &lt;cylinder&gt;
+                &lt;radius&gt;0.4&lt;/radius&gt;
+                &lt;length&gt;0.2&lt;/length&gt;
+            &lt;/cylinder&gt;
+        &lt;/geometry&gt;
+        &lt;material&gt;
+            &lt;ambient&gt;1.0 0.0 0.0 1&lt;/ambient&gt;
+            &lt;diffuse&gt;1.0 0.0 0.0 1&lt;/diffuse&gt;
+            &lt;specular&gt;1.0 0.0 0.0 1&lt;/specular&gt;
+        &lt;/material&gt;
+    &lt;/visual&gt;
+    &lt;collision name='collision'&gt;
+        &lt;geometry&gt;
+            &lt;cylinder&gt;
+                &lt;radius&gt;0.4&lt;/radius&gt;
+                &lt;length&gt;0.2&lt;/length&gt;
+            &lt;/cylinder&gt;
+        &lt;/geometry&gt;
+    &lt;/collision&gt;
+&lt;/link&gt;
+&lt;!--The same as left wheel but with different position--&gt;
+&lt;link name='right_wheel'&gt;
+    &lt;pose relative_to="chassis"&gt;-0.5 -0.6 0 -1.5707 0 0&lt;/pose&gt; &lt;!--angles are in radian--&gt;
+    &lt;inertial&gt;
+        &lt;mass&gt;1&lt;/mass&gt;
+        &lt;inertia&gt;
+            &lt;ixx&gt;0.043333&lt;/ixx&gt;
+            &lt;ixy&gt;0&lt;/ixy&gt;
+            &lt;ixz&gt;0&lt;/ixz&gt;
+            &lt;iyy&gt;0.043333&lt;/iyy&gt;
+            &lt;iyz&gt;0&lt;/iyz&gt;
+            &lt;izz&gt;0.08&lt;/izz&gt;
+        &lt;/inertia&gt;
+    &lt;/inertial&gt;
+    &lt;visual name='visual'&gt;
+        &lt;geometry&gt;
+            &lt;cylinder&gt;
+                &lt;radius&gt;0.4&lt;/radius&gt;
+                &lt;length&gt;0.2&lt;/length&gt;
+            &lt;/cylinder&gt;
+        &lt;/geometry&gt;
+        &lt;material&gt;
+            &lt;ambient&gt;1.0 0.0 0.0 1&lt;/ambient&gt;
+            &lt;diffuse&gt;1.0 0.0 0.0 1&lt;/diffuse&gt;
+            &lt;specular&gt;1.0 0.0 0.0 1&lt;/specular&gt;
+        &lt;/material&gt;
+    &lt;/visual&gt;
+    &lt;collision name='collision'&gt;
+        &lt;geometry&gt;
+            &lt;cylinder&gt;
+                &lt;radius&gt;0.4&lt;/radius&gt;
+                &lt;length&gt;0.2&lt;/length&gt;
+            &lt;/cylinder&gt;
+        &lt;/geometry&gt;
+    &lt;/collision&gt;
+&lt;/link&gt;
+
+</pre>
+
+                We now need to add a third wheel in the front (caster wheel).<br>
+                To do that, we create a frame and attach the wheel to it.<br><br>
+                Just copy this additional tags for it:
+
+
+<pre>
+&lt;frame name="caster_frame" attached_to='chassis'&gt;
+    &lt;pose&gt;0.8 0 -0.2 0 0 0&lt;/pose&gt;
+&lt;/frame&gt;
+&lt;!--caster wheel--&gt;
+&lt;link name='caster'&gt;
+    &lt;pose relative_to='caster_frame'/&gt;
+    &lt;inertial&gt;
+        &lt;mass&gt;1&lt;/mass&gt;
+        &lt;inertia&gt;
+            &lt;ixx&gt;0.016&lt;/ixx&gt;
+            &lt;ixy&gt;0&lt;/ixy&gt;
+            &lt;ixz&gt;0&lt;/ixz&gt;
+            &lt;iyy&gt;0.016&lt;/iyy&gt;
+            &lt;iyz&gt;0&lt;/iyz&gt;
+            &lt;izz&gt;0.016&lt;/izz&gt;
+        &lt;/inertia&gt;
+    &lt;/inertial&gt;
+    &lt;visual name='visual'&gt;
+        &lt;geometry&gt;
+            &lt;sphere&gt;
+                &lt;radius&gt;0.2&lt;/radius&gt;
+            &lt;/sphere&gt;
+        &lt;/geometry&gt;
+        &lt;material&gt;
+            &lt;ambient&gt;0.0 1 0.0 1&lt;/ambient&gt;
+            &lt;diffuse&gt;0.0 1 0.0 1&lt;/diffuse&gt;
+            &lt;specular&gt;0.0 1 0.0 1&lt;/specular&gt;
+        &lt;/material&gt;
+    &lt;/visual&gt;
+    &lt;collision name='collision'&gt;
+        &lt;geometry&gt;
+            &lt;sphere&gt;
+                &lt;radius&gt;0.2&lt;/radius&gt;
+            &lt;/sphere&gt;
+        &lt;/geometry&gt;
+    &lt;/collision&gt;
+&lt;/link&gt;
+
+</pre>
+
+                With this, we first define a new frame for our model. And then attach the caster wheel link to it.<br>
+                Frames are important because they allow you to define rotations and position relative to them, allowing
+                you to have moving and rotating parts independently from the main frame.<br><br>
+
+                At this point, your robot should look like this:
+
+                <img class="centered" src="./imgs/lecture_5/robot_1.png">
+
+                Great! This defines almost everything we need.<br>
+                If you start your simulation now, your robot will fall to pieces though.<br>
+                This is because we have not defined any joint yet.<br><br>
+
+                Let's also do that!<br><br>
+
+                This is the code for all three joints (one for each wheel):
+                
+                <pre>
+&lt;joint name='left_wheel_joint' type='revolute'&gt;
+    &lt;pose relative_to='left_wheel'/&gt;   
+    &lt;parent&gt;chassis&lt;/parent&gt;
+    &lt;child&gt;left_wheel&lt;/child&gt;
+    &lt;axis&gt;
+        &lt;xyz expressed_in='__model__'&gt;0 1 0&lt;/xyz&gt; &lt;!--can be defined as any frame or even arbitrary frames--&gt;
+        &lt;limit&gt;
+            &lt;lower&gt;-1.79769e+308&lt;/lower&gt;    &lt;!--negative infinity--&gt;
+            &lt;upper&gt;1.79769e+308&lt;/upper&gt;     &lt;!--positive infinity--&gt;
+        &lt;/limit&gt;
+    &lt;/axis&gt;
+&lt;/joint&gt;
+&lt;joint name='right_wheel_joint' type='revolute'&gt;
+    &lt;pose relative_to='right_wheel'/&gt;
+    &lt;parent&gt;chassis&lt;/parent&gt;
+    &lt;child&gt;right_wheel&lt;/child&gt;
+    &lt;axis&gt;
+        &lt;xyz expressed_in='__model__'&gt;0 1 0&lt;/xyz&gt;
+        &lt;limit&gt;
+            &lt;lower&gt;-1.79769e+308&lt;/lower&gt;    &lt;!--negative infinity--&gt;
+            &lt;upper&gt;1.79769e+308&lt;/upper&gt;     &lt;!--positive infinity--&gt;
+        &lt;/limit&gt;
+    &lt;/axis&gt;
+&lt;/joint&gt;
+&lt;joint name='caster_wheel' type='ball'&gt;
+    &lt;parent&gt;chassis&lt;/parent&gt;
+    &lt;child&gt;caster&lt;/child&gt;
+&lt;/joint&gt;
+                </pre>
+
+                As you can see, the front and left wheel have a joint of type <span class="snippet">revolute</span>,
+                this allows the wheel to have one rotational degree of freedom, which is later defined.
+                
+
+            </p>
+
+
+            <p class="subsection">Moving the robot</p>
+
+            <p>
+
+                Models in Gazebo are static by default. With no scripted behaviour whatsoever.<br>
+                If you want to add some behaviour to your world, you will have to add plugins to your models.<br><br>
+
+                For our robot, we will use a plugin named <span class="snippet">diff_drive</span> to control our robot.<br><br>
+
+                After your last <span class="snippet">joint</span>, add the following code:
+
+            <pre>
+&lt;plugin
+    filename="libignition-gazebo-diff-drive-system.so"
+    name="ignition::gazebo::systems::DiffDrive"&gt;
+    &lt;left_joint&gt;left_wheel_joint&lt;/left_joint&gt;
+    &lt;right_joint&gt;right_wheel_joint&lt;/right_joint&gt;
+    &lt;wheel_separation&gt;1.2&lt;/wheel_separation&gt;
+    &lt;wheel_radius&gt;0.4&lt;/wheel_radius&gt;
+    &lt;odom_publish_frequency&gt;1&lt;/odom_publish_frequency&gt;
+    &lt;topic&gt;cmd_vel&lt;/topic&gt;
+&lt;/plugin&gt;
+                </pre>
+
+                Here, we define our plugin, with different properties set.<br>
+                To know how to properly set up a plugin, you can refer to their official documentation, for the case of our
+                <span class="snippet">DiffDrive</span>: <a href="https://gazebosim.org/api/gazebo/4.5/classignition_1_1gazebo_1_1systems_1_1DiffDrive.html">here</a>.<br>
+                All the built plugins available with the installation of Gazebo can be found in the following directory:<br>
+                
+                <p class="code">
+                    /usr/lib/x86_64-linux-gnu/ign-gazebo-6/plugins
+                </p>
+
+                Gazebo plugins are defined in C++. If you want to implement custom behaviours to your model, you will
+                have to write C++ code. For the rest of the course though, we will be using only already
+                built plugins.<br><br>
+
+                Something familiar should pop up here in the plugin snippet: <span class="snippet">cmd_vel</span>!<br>
+                Guess what? This plugin allows the robot to be moved by listening to a particular topic, in this case,
+                <span class="snippet">/cmd_vel</span>!<br>
+                We can send data to that topic from ROS really easily, with some additional steps.<br><br>
+
+                Before doing that, you can test if your robot works independently from ROS.<br>
+                In your side panel you can add a new plugin called <span class="snippet">teleop</span>. This plugins
+                allows you to publish data to a topic just like the <span class="snippet">teleop</span> of turtlesim.
+
+                <img class="centered" src="./imgs/lecture_5/broom.gif">
+
+                The resulting sdf file for this part can be downloaded directly here: <a href="./exercise_solutions/exercise_6/vehicle_blue_world.sdf">vehicle_blue_world.sdf</a>.<br><br>
+
+                For what was covered in this part, these links may come in hand as future reference:<br>
+                -Official SDF documentation: <a href="http://sdformat.org/spec?ver=1.9">here</a>.<br>
+                -List of all the plugins installed by default with Gazebo, with their source: <a href="https://github.com/gazebosim/gz-sim/tree/gz-sim7/src/systems">here</a>.<br>
+                -Ignition Gazebo API: <a href="https://gazebosim.org/api/gazebo/4.5/">here</a>.<br>
+
+            </p>
+
+
+        <p class="section">ROS and Gazebo - Bridging the two environments together!</p>
+        
+        <p>
+            As stated before, Gazebo uses topics and services just like ROS.<br>
+            Just like ROS, Gazebo has its own syntax to list and call topics and services by console.<br><br>
+
+            We are only interested in two main commands at this time: listing and getting infos from topics/services.<br><br>
+            
+            To list topics, just type:
+
+            <p class="code">
+                ign topic -l
+            </p>
+
+            and, you may have guessed:
+
+            <p class="code">
+                ign service -l
+            </p>
+
+            to list services.<br><br>
+
+            Note that in Gazebo, you can only list topics that have a publisher for it. If you have a topic with only subscribers, that topic won't show in your
+            list. If you are unsure of what topic to bridge from a plugin and they don't appear in your list, please refer to the official plugin documentation
+            too see what topics are correct (most plugins have a default topic, which can be redefined with a particular tag).
+
+            To get info about a topic, can type:
+
+            <p class="code">
+                ign topic -i --topic [topic_name]
+            </p>
+
+            And this gives you information about the topic. Same thing applies for services.<br><br>
+
+            Let's check what we see if we try to get more info about <span class="snippet">/cmd_vel</span>.
+
+            <img class="centered" src="./imgs/lecture_5/topic_info.png">
+
+            With this command, just like for ROS, we are able to see the type of message the topic expects to receive.<br>
+            Gazebo additionally assigns for each topic a socket where messages can be sent. We don't care about this part.<br><br>
+
+            The type of the message will be important in order to bridge it to ROS topics.<br><br>
+
+            It's time to create the bridge!<br>
+            To do that, we will be using a ROS application which you should have already installed, called
+            <span class="snippet">ros_gz_bridge</span>.<br><br>
+
+            To bridge a topic, you need to input the following command:
+
+            <p class="code">
+                ros2 run ros_gz_bridge parameter_bridge NAME_OF_THE_TOPIC@ROS_INTERFACE@GAZEBO_INTERFACE
+            </p>
+
+            This will create a bi-directional bridge between the two environment for the given topic.<br>
+            
+            To know what interface to use for one end, given that you know the other one, you can check the official documentation
+            of <span class="snippet">ros_gz_bridge</span> on GitHub, <a href="https://github.com/gazebosim/ros_gz/tree/ros2/ros_gz_bridge">here</a>.<br><br>
+
+            Note that the namespaces used for Gazebo there refer to Gazebo Garden. All the namespaces in Fortress begin with
+            <span class="snippet">ignition</span> instead of <span class="snippet">gz</span>
+            <br><br>
+            <!-- You can specify a one-way bridge by changing the second <span class="snippet">@</span> with <span class="snippet">]</span> or <span class="snippet">[</span> -->
+
+            Let's say that we want to bridge our <span class="snippet">/cmd_vel</span> topic, what we have to write is:
+
+            <p class="code">
+                ros2 run ros_gz_bridge parameter_bridge /cmd_vel@geometry_msgs/msg/Twist@ignition.msgs.Twist
+            </p>
+
+            If you typed everything correct, you should have the bridge correctly created in both directions, just like this:
+
+            <img class="centered" src="./imgs/lecture_5/ros_gz_bridge_example.png">
+
+            And that's it! If you now try to list ROS topics, you will see that <span class="snippet">/cmd_vel</span> is there!
+
+        </p>
+    
+
+        <p class="section">Exercise 6 - Bridge and play</p>
+
+        <p>
+            You are here requested to create a ROS project, which launches the Gazebo world we just created, plays the simulation,
+            and controls the vehicle to move in a squared pattern. When the movement is complete, the simulation should pause.<br>
+            It is not required to perform an actual square with the vehicle, you can simply eyeball it. Any trajectory will do just fine.<br><br>
+
+            <span class="snippet">ros_gz_bridge</span> is just a ROS node, that can be executed by a launch file just like for other nodes.<br>
+            You can pass the string to configure the bridge by adding the parameter <span class="snippet">arguments=["arg1", "arg2", ...]</span> to your
+            <span class="snippet">Node</span> object.<br><br>
+            Feel free to take a look at the previous lecture to see how launch files are written.<br><br>
+
+            To help you get started, this launch file will immediately start Gazebo when run: <a href="./exercise_solutions/exercise_6/hint/launch_gazebo.py">launch_gazebo.py</a><br>
+            <span class="snippet">ros_gz_bridge</span> currently supports bridge for only one service, which is the one we need to start and stop the simulation.<br>
+            Refer to the example on the GitHub page to find out how to do that.<br><br>
+
+            Good luck!
+        </p>
+
+
+
+        <input class="spoilerbutton" type="button" value="Show" onclick="this.value=this.value=='Show'?'Hide':'Show';">
+        <div class="spoiler">
+            <div>
+                <p>
+                    So, this exercise was here for you to get used to bridging nodes using launcher files.<br>
+                    The exercise itself shouldn't have been that hard to complete, after you managed to setup your launch file to start all the bridges
+                    and your node.<br><br>
+
+                    The solution for the launch file is the following: <a href="./exercise_solutions/exercise_6/launch_gazebo.py">launch_gazebo.py</a><br>
+                    This is the file for controlling the vehicle: <a href="./exercise_solutions/exercise_6/vehicle_controller.py">vehicle_controller.py</a><br>
+                    The sdf file we're using for the world is the same produced by the lecture, which is the following: <a href="./exercise_solutions/exercise_6/vehicle_blue_world.sdf">vehicle_blue_world.sdf</a>
+                </p>
+            </div>
+        </div>
+
+        <p>
+            <strong>EXTRA</strong>: with the knowledge of the patrolling turtle exercise, would you be able to move
+            the vehicle up to a precise point in space?<br>
+            Information about the vehicle position are published to <span class="snippet">/model/vehicle_blue/odometry</span>. Can you use quaternions? Give it a try!
+        </p>
+
+
+        <p class="section">Conclusions</p>
+    
+        <p>
+            That's it. After this lecture, you should start getting an idea on how Gazebo works, and how it can be used in conjuction with ROS.<br>
+            Gazebo is a really complex application, with lots of moving parts, but for those (i.e., us) who are just interested in controlling
+            a simulated environment, there is really not much added in terms of complexity to what we have seen so far.<br><br>
+
+            All the code that we have written so far for the TurtleSim can be translated easily to a Gazebo robot with few lines of code.<br><br>
+
+            The additional complexity now is given by the fact that we are working in a 3D enviroment. Movements and in particular
+            rotations are way more complex to calculate, and probably harder to visualize if you are used to work in a 2D space.<br><br>
+
+            In the next lecture, we will use Gazebo and ROS to pilot an X3 drone in a 3D space.<br><br>
+
+            See you soon!
+            
+        </p>
+
+        <div class="to_be_continued"></div> 
+
+    </div>
+
+
+    </body>
+</html>
