@@ -10,7 +10,7 @@
 
             <p>    
                 In this lecture, we are finally getting started with the second part of our lab course, by introducing Gazebo!<br>
-                We will take what we have learnt in the past lectures about ROS, and move it to a complex simulation enviroment which allows us
+                We will take what we have learnt in the past lectures about ROS, and move it to a complex simulation environment which allows us
                 to properly test the drones we control with ROS.<br><br>
 
                 Before getting into the code part using ROS, let's take a moment to talk about Gazebo.
@@ -41,7 +41,7 @@
                     sudo apt-get install ros-${ROS_DISTRO}-ros-gz
                 </p>
 
-                This will install Gazebo, along with <span class="snippet">ros_gz_bridge</span>, which will allow us to bridge the enviroment of
+                This will install Gazebo, along with <span class="snippet">ros_gz_bridge</span>, which will allow us to bridge the environment of
                 Gazebo with the one of ROS.
                 If you are using the version we've been using so far with ROS (Humble), this command should automatically install Gazebo Fortress
                 as a default version.<br><br>
@@ -52,7 +52,7 @@
                     ign gazebo default.sdf
                 </p>
 
-                This will create an empty world, which we will use to get more confident with the enviroment of Gazebo.<br><br>
+                This will create an empty world, which we will use to get more confident with the environment of Gazebo.<br><br>
 
                 If you want instead to just have fun with Gazebo and learn by trial and error, just type
                 <p class="code">
@@ -91,7 +91,7 @@
                 Gazebo generates 3D world by reading from Simulation Description Format (SDF) files.<br><br>
                 SDF is an XML format which is used to describe objects and environments for robot simulations and visualizations.<br><br>
 
-                Writing SDF files from scrap can be really teadious, but we won't be doing that for the most part.<br>
+                Writing SDF files from scrap can be really tedious, but we won't be doing that for the most part.<br>
                 If you want to create your own world, the best course of action would be to find an already existing minimal world, and to build on top of that.<br><br>
 
                 You can do that by opening an already existing world in Gazebo, editing it, end then export it.<br><br>
@@ -116,7 +116,7 @@
                 Let's start!<br><br>
 
                 In SDF, every model is a a group of <span class="snippet">link</span>s, which can be then connected together using <span class="snippet">joint</span>s.<br><br>
-                We can define the main body of the robot with the following tags! Let's add them alognside the ground plane model.
+                We can define the main body of the robot with the following tags! Let's add them alongside the ground plane model.
 
 <pre>
 &lt;model name='vehicle_blue' canonical_link='chassis'&gt;
@@ -361,8 +361,8 @@
 
             <p>
 
-                Models in Gazebo are static by default. With no scripted behaviour whatsoever.<br>
-                If you want to add some behaviour to your world, you will have to add plugins to your models.<br><br>
+                Models in Gazebo are static by default. With no scripted behavior whatsoever.<br>
+                If you want to add some behavior to your world, you will have to add plugins to your models.<br><br>
 
                 For our robot, we will use a plugin named <span class="snippet">diff_drive</span> to control our robot.<br><br>
 
@@ -390,7 +390,7 @@
                     /usr/lib/x86_64-linux-gnu/ign-gazebo-6/plugins
                 </p>
 
-                Gazebo plugins are defined in C++. If you want to implement custom behaviours to your model, you will
+                Gazebo plugins are defined in C++. If you want to implement custom behaviors to your model, you will
                 have to write C++ code. For the rest of the course though, we will be using only already
                 built plugins.<br><br>
 
@@ -542,13 +542,13 @@
         <p class="section">Conclusions</p>
     
         <p>
-            That's it. After this lecture, you should start getting an idea on how Gazebo works, and how it can be used in conjuction with ROS.<br>
+            That's it. After this lecture, you should start getting an idea on how Gazebo works, and how it can be used in conjunction with ROS.<br>
             Gazebo is a really complex application, with lots of moving parts, but for those (i.e., us) who are just interested in controlling
             a simulated environment, there is really not much added in terms of complexity to what we have seen so far.<br><br>
 
             All the code that we have written so far for the TurtleSim can be translated easily to a Gazebo robot with few lines of code.<br><br>
 
-            The additional complexity now is given by the fact that we are working in a 3D enviroment. Movements and in particular
+            The additional complexity now is given by the fact that we are working in a 3D environment. Movements and in particular
             rotations are way more complex to calculate, and probably harder to visualize if you are used to work in a 2D space.<br><br>
 
             In the next lecture, we will use Gazebo and ROS to pilot an X3 drone in a 3D space.<br><br>
